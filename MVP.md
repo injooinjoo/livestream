@@ -6,14 +6,21 @@
 
 스트리머가 다음 작업을 할 수 있으면 MVP 완성:
 1. ✅ 회원가입/로그인
-2. ✅ **치지직** 계정 연동 (한국 시장 우선!)
+2. ✅ **YouTube** 계정 연동 (검증된 API!)
 3. ✅ 알림 위젯 생성
 4. ✅ URL을 OBS에 추가
-5. ✅ 실제 치지직 팔로우/후원 → OBS에 알림 표시
+5. ✅ 실제 YouTube 슈퍼챗/구독 → OBS에 알림 표시
 
-### 플랫폼 우선순위
-- **1순위**: 치지직 (CHZZK) - 한국 시장 타겟
-- **대체안**: 치지직 API 없을 경우 Twitch로 검증 후 치지직 추가
+### 플랫폼 우선순위 (변경!)
+- **1순위**: YouTube Live - API 확실, MVP 검증
+- **2순위**: 치지직 (CHZZK) - YouTube 검증 후 추가
+- **3순위**: SOOP - 한국 시장 완성
+- ⚠️ **Twitch 제외**: 한국 시장 집중
+
+### 전략
+1. YouTube로 아키텍처 검증 (Week 7-8)
+2. 검증 완료 후 치지직 연동 (Week 9-11)
+3. 한국 플랫폼 확장 (SOOP)
 
 ---
 
@@ -129,21 +136,26 @@ CREATE INDEX idx_widgets_type ON widgets(type);
 
 ---
 
-### Week 7-9: 치지직 연동 (첫 번째 플랫폼)
+### Week 7-8: YouTube Live 연동 (첫 번째 플랫폼)
 
 #### 결과물
-- [ ] 치지직 API 조사 및 개발자 등록
-- [ ] OAuth 2.0 인증 플로우 (또는 다른 인증)
+- [ ] Google Cloud Console 프로젝트 생성
+- [ ] YouTube Data API v3 활성화
+- [ ] OAuth 2.0 인증 플로우 구현
 - [ ] Access Token 암호화 저장
-- [ ] 실시간 이벤트 수신 (WebHook/WebSocket/Polling)
-- [ ] 팔로우/구독/후원 이벤트 처리
+- [ ] Refresh Token 갱신 로직
+- [ ] Live Chat API Polling (10초 간격)
+- [ ] 슈퍼챗 이벤트 수신 및 처리
+- [ ] 멤버십 가입 이벤트 (선택적)
 - [ ] WebSocket으로 위젯에 푸시
 - [ ] 이벤트 히스토리 저장 및 조회
 - [ ] 이벤트 재생 기능
 
-#### 대체 계획
-- 치지직 API 없을 경우: Twitch로 먼저 검증
-- Twitch 완성 후 치지직 추가 개발
+#### 왜 YouTube 먼저?
+- ✅ API 확실하고 문서화 우수
+- ✅ 검증된 OAuth 2.0
+- ✅ 많은 예제 코드
+- ✅ 치지직 API 조사 완료 전까지
 
 #### 데이터베이스 스키마 추가
 ```sql
@@ -177,41 +189,41 @@ CREATE INDEX idx_events_created_at ON events(created_at DESC);
 CREATE INDEX idx_events_type ON events(event_type);
 ```
 
-#### 치지직 이벤트 (예상)
-- 팔로우
-- 구독 (후원)
-- 채팅
-- 도네이션
+#### YouTube Live 이벤트
+- 슈퍼챗 (Super Chat) - 후원
+- 슈퍼 스티커 (Super Stickers)
+- 멤버십 가입 (Memberships)
+- 일반 채팅 메시지
 
 #### 테스트 시나리오
 ```
-1. 대시보드에서 "치지직 연동" 클릭
-2. 치지직 로그인 페이지로 리다이렉트
-3. 권한 승인
+1. 대시보드에서 "YouTube 연동" 클릭
+2. Google 로그인 페이지로 리다이렉트
+3. YouTube 권한 승인
 4. 대시보드로 돌아옴 → "연동 완료" 표시
-5. 실제 치지직 채널에서 팔로우 발생
-6. OBS 화면에 즉시 알림 표시
-7. 대시보드 "이벤트 기록"에서 확인 가능
-8. "재생" 버튼으로 다시 보기
+5. YouTube Live 방송 시작
+6. 실제 슈퍼챗 발생
+7. OBS 화면에 즉시 알림 표시!
+8. 대시보드 "이벤트 기록"에서 확인 가능
+9. "재생" 버튼으로 다시 보기
 ```
 
 #### 환경변수 설정
 ```env
-# 치지직 OAuth (예상)
-CHZZK_CLIENT_ID=your_client_id
-CHZZK_CLIENT_SECRET=your_client_secret
-CHZZK_CALLBACK_URL=http://localhost:3000/api/v1/auth/callback/chzzk
+# YouTube OAuth 2.0
+YOUTUBE_CLIENT_ID=your_google_client_id
+YOUTUBE_CLIENT_SECRET=your_google_client_secret
+YOUTUBE_CALLBACK_URL=http://localhost:3000/api/v1/auth/callback/youtube
 
-# WebHook (API 방식에 따라 변경)
-WEBHOOK_BASE_URL=https://your-domain.com
+# Redirect URI (Google Cloud Console에 등록)
+# http://localhost:3000/api/v1/auth/callback/youtube
 ```
 
-#### 참고: Twitch 설정 (대체안)
+#### 참고: 치지직 설정 (Phase 5에서 추가)
 ```env
-TWITCH_CLIENT_ID=your_client_id
-TWITCH_CLIENT_SECRET=your_client_secret
-TWITCH_CALLBACK_URL=http://localhost:3000/api/v1/auth/callback/twitch
-TWITCH_EVENTSUB_SECRET=your_webhook_secret
+CHZZK_CLIENT_ID=to_be_investigated
+CHZZK_CLIENT_SECRET=to_be_investigated
+CHZZK_CALLBACK_URL=http://localhost:3000/api/v1/auth/callback/chzzk
 ```
 
 #### 우선순위: 🔴 최우선
@@ -223,13 +235,13 @@ TWITCH_EVENTSUB_SECRET=your_webhook_secret
 
 ### 기능 체크리스트
 - [ ] 사용자 회원가입/로그인
-- [ ] 치지직 OAuth 연동 (1순위)
+- [ ] YouTube OAuth 2.0 연동 (1순위)
 - [ ] 알림 위젯 생성
 - [ ] 위젯 설정 변경 (메시지, 색상, 사운드)
 - [ ] 위젯 URL 복사
 - [ ] OBS에서 브라우저 소스로 위젯 추가
 - [ ] 실시간 WebSocket 연결
-- [ ] 치지직 팔로우/후원 이벤트 수신
+- [ ] YouTube 슈퍼챗/멤버십 이벤트 수신
 - [ ] OBS 화면에 알림 표시
 - [ ] 사운드 재생
 - [ ] 애니메이션 (입장/퇴장)
@@ -245,8 +257,8 @@ TWITCH_EVENTSUB_SECRET=your_webhook_secret
 - [ ] Socket.IO WebSocket 서버
 - [ ] React 프론트엔드
 - [ ] JWT 인증
-- [ ] 치지직 API 연동 (1순위)
-- [ ] 실시간 이벤트 수신 (WebHook/WebSocket/Polling)
+- [ ] YouTube API 연동 (googleapis)
+- [ ] Live Chat API Polling
 - [ ] 암호화 (Access Token)
 
 ### 성능 체크리스트
@@ -325,15 +337,16 @@ TWITCH_EVENTSUB_SECRET=your_webhook_secret
 
 ### MVP 완성 = 다음 조건을 모두 만족
 1. ✅ 실제 스트리머가 5분 안에 설정 가능
-2. ✅ 치지직 팔로우/후원이 실시간으로 표시됨
+2. ✅ YouTube 슈퍼챗이 실시간으로 표시됨
 3. ✅ CPU 사용률이 2% 미만
 4. ✅ 24시간 연속 작동 (메모리 누수 없음)
 5. ✅ 에러 발생 시 자동 복구
 
-### 대체 성공 기준 (치지직 API 없을 경우)
-1. ✅ Twitch로 MVP 검증 완료
-2. ✅ 치지직 연동 계획 수립
-3. ✅ 한국 시장 진출 전략 구체화
+### 다음 단계 (MVP 완료 후)
+1. ✅ YouTube로 아키텍처 검증 완료
+2. 치지직 API 조사 및 연동 (Phase 5)
+3. SOOP 연동 (Phase 6)
+4. 한국 스트리밍 시장 완전 대응
 
 ### 다음 단계로 진행 조건
 - 최소 10명의 테스터가 실제로 사용
