@@ -1,0 +1,77 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  username  String
+  password  String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  widgets              Widget[]
+  platformConnections  PlatformConnection[]
+  events               Event[]
+
+  @@map("users")
+}
+
+model PlatformConnection {
+  id               String    @id @default(cuid())
+  userId           String
+  platform         String    // youtube, chzzk, soop, nexon
+  platformUserId   String
+  platformUsername String
+  accessToken      String
+  refreshToken     String?
+  expiresAt        DateTime?
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, platform])
+  @@map("platform_connections")
+}
+
+model Widget {
+  id        String   @id @default(cuid())
+  userId    String
+  type      String   // alert, chat, goal, poll, etc.
+  name      String
+  settings  Json     @default("{}")
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user   User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  events Event[]
+
+  @@map("widgets")
+}
+
+model Event {
+  id        String   @id @default(cuid())
+  userId    String
+  widgetId  String?
+  platform  String   // youtube, chzzk, soop, nexon
+  eventType String   // follow, subscribe, donation, chat, game_levelup, etc.
+  eventData Json
+  createdAt DateTime @default(now())
+
+  user   User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  widget Widget? @relation(fields: [widgetId], references: [id], onDelete: SetNull)
+
+  @@index([userId, createdAt])
+  @@index([widgetId, createdAt])
+  @@map("events")
+}
