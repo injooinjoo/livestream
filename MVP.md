@@ -6,10 +6,14 @@
 
 스트리머가 다음 작업을 할 수 있으면 MVP 완성:
 1. ✅ 회원가입/로그인
-2. ✅ Twitch 계정 연동
+2. ✅ **치지직** 계정 연동 (한국 시장 우선!)
 3. ✅ 알림 위젯 생성
 4. ✅ URL을 OBS에 추가
-5. ✅ 실제 Twitch 팔로우 → OBS에 알림 표시
+5. ✅ 실제 치지직 팔로우/후원 → OBS에 알림 표시
+
+### 플랫폼 우선순위
+- **1순위**: 치지직 (CHZZK) - 한국 시장 타겟
+- **대체안**: 치지직 API 없을 경우 Twitch로 검증 후 치지직 추가
 
 ---
 
@@ -125,24 +129,28 @@ CREATE INDEX idx_widgets_type ON widgets(type);
 
 ---
 
-### Week 7-9: Twitch 연동 (첫 번째 플랫폼)
+### Week 7-9: 치지직 연동 (첫 번째 플랫폼)
 
 #### 결과물
-- [ ] Twitch 개발자 앱 등록
-- [ ] OAuth 2.0 인증 플로우
+- [ ] 치지직 API 조사 및 개발자 등록
+- [ ] OAuth 2.0 인증 플로우 (또는 다른 인증)
 - [ ] Access Token 암호화 저장
-- [ ] Twitch EventSub 웹훅 수신
-- [ ] 팔로우 이벤트 처리
+- [ ] 실시간 이벤트 수신 (WebHook/WebSocket/Polling)
+- [ ] 팔로우/구독/후원 이벤트 처리
 - [ ] WebSocket으로 위젯에 푸시
 - [ ] 이벤트 히스토리 저장 및 조회
 - [ ] 이벤트 재생 기능
+
+#### 대체 계획
+- 치지직 API 없을 경우: Twitch로 먼저 검증
+- Twitch 완성 후 치지직 추가 개발
 
 #### 데이터베이스 스키마 추가
 ```sql
 CREATE TABLE platform_connections (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   user_id UUID REFERENCES users(id) ON DELETE CASCADE,
-  platform VARCHAR(50) NOT NULL, -- 'twitch', 'youtube'
+  platform VARCHAR(50) NOT NULL, -- 'chzzk', 'soop', 'youtube', 'twitch'
   platform_user_id VARCHAR(255) NOT NULL,
   platform_username VARCHAR(255),
   access_token TEXT NOT NULL, -- encrypted
@@ -169,19 +177,19 @@ CREATE INDEX idx_events_created_at ON events(created_at DESC);
 CREATE INDEX idx_events_type ON events(event_type);
 ```
 
-#### Twitch EventSub 이벤트
-- `channel.follow` - 팔로우
-- `channel.subscribe` - 구독
-- `channel.subscription.gift` - 구독 선물
-- `channel.cheer` - 비트 후원
+#### 치지직 이벤트 (예상)
+- 팔로우
+- 구독 (후원)
+- 채팅
+- 도네이션
 
 #### 테스트 시나리오
 ```
-1. 대시보드에서 "Twitch 연동" 클릭
-2. Twitch 로그인 페이지로 리다이렉트
+1. 대시보드에서 "치지직 연동" 클릭
+2. 치지직 로그인 페이지로 리다이렉트
 3. 권한 승인
 4. 대시보드로 돌아옴 → "연동 완료" 표시
-5. 실제 Twitch 채널에서 팔로우 발생
+5. 실제 치지직 채널에서 팔로우 발생
 6. OBS 화면에 즉시 알림 표시
 7. 대시보드 "이벤트 기록"에서 확인 가능
 8. "재생" 버튼으로 다시 보기
@@ -189,14 +197,21 @@ CREATE INDEX idx_events_type ON events(event_type);
 
 #### 환경변수 설정
 ```env
-# Twitch OAuth
+# 치지직 OAuth (예상)
+CHZZK_CLIENT_ID=your_client_id
+CHZZK_CLIENT_SECRET=your_client_secret
+CHZZK_CALLBACK_URL=http://localhost:3000/api/v1/auth/callback/chzzk
+
+# WebHook (API 방식에 따라 변경)
+WEBHOOK_BASE_URL=https://your-domain.com
+```
+
+#### 참고: Twitch 설정 (대체안)
+```env
 TWITCH_CLIENT_ID=your_client_id
 TWITCH_CLIENT_SECRET=your_client_secret
 TWITCH_CALLBACK_URL=http://localhost:3000/api/v1/auth/callback/twitch
-
-# EventSub Webhook
 TWITCH_EVENTSUB_SECRET=your_webhook_secret
-WEBHOOK_BASE_URL=https://your-domain.com
 ```
 
 #### 우선순위: 🔴 최우선
@@ -208,13 +223,13 @@ WEBHOOK_BASE_URL=https://your-domain.com
 
 ### 기능 체크리스트
 - [ ] 사용자 회원가입/로그인
-- [ ] Twitch OAuth 연동
+- [ ] 치지직 OAuth 연동 (1순위)
 - [ ] 알림 위젯 생성
 - [ ] 위젯 설정 변경 (메시지, 색상, 사운드)
 - [ ] 위젯 URL 복사
 - [ ] OBS에서 브라우저 소스로 위젯 추가
 - [ ] 실시간 WebSocket 연결
-- [ ] Twitch 팔로우 이벤트 수신
+- [ ] 치지직 팔로우/후원 이벤트 수신
 - [ ] OBS 화면에 알림 표시
 - [ ] 사운드 재생
 - [ ] 애니메이션 (입장/퇴장)
@@ -230,8 +245,8 @@ WEBHOOK_BASE_URL=https://your-domain.com
 - [ ] Socket.IO WebSocket 서버
 - [ ] React 프론트엔드
 - [ ] JWT 인증
-- [ ] Twitch API 연동
-- [ ] EventSub WebHook
+- [ ] 치지직 API 연동 (1순위)
+- [ ] 실시간 이벤트 수신 (WebHook/WebSocket/Polling)
 - [ ] 암호화 (Access Token)
 
 ### 성능 체크리스트
@@ -253,19 +268,34 @@ WEBHOOK_BASE_URL=https://your-domain.com
 
 ## MVP 이후 확장 (Optional)
 
-### Phase 2 기능 (선택적)
+### Phase 5-6: 기능 확장
 - [ ] 사전 제작 테마 5종
 - [ ] 커스텀 CSS 에디터
 - [ ] 채팅 오버레이 위젯
 - [ ] 시청자 카운터 위젯
 - [ ] 최근 팔로워 목록 위젯
 
-### Phase 3 기능 (선택적)
+### Phase 7-8: 한국 시장 완성
+- [ ] SOOP (아프리카TV) 연동
 - [ ] YouTube Live 연동
-- [ ] 멀티 플랫폼 지원
+- [ ] 멀티 플랫폼 지원 (치지직 + SOOP + YouTube)
+- [ ] 통계 대시보드
+
+### Phase 9: 넥슨 게임 연동 🎮 (차별화!)
+- [ ] 메이플스토리 플레이 이벤트
+  - 레벨업
+  - 보스 처치
+  - 레어 아이템 드롭
+- [ ] 던전앤파이터 지원
+- [ ] 카트라이더 지원
+- [ ] 로컬 클라이언트 개발
+- [ ] 게임 이벤트 알림 위젯
+
+### Phase 10+: 고급 기능
 - [ ] 후원 플랫폼 연동 (Toss, Kakaopay)
 - [ ] 목표 게이지 위젯
-- [ ] 통계 대시보드
+- [ ] 투표/설문 위젯
+- [ ] TTS 기능
 
 ---
 
@@ -295,10 +325,15 @@ WEBHOOK_BASE_URL=https://your-domain.com
 
 ### MVP 완성 = 다음 조건을 모두 만족
 1. ✅ 실제 스트리머가 5분 안에 설정 가능
-2. ✅ Twitch 팔로우가 실시간으로 표시됨
+2. ✅ 치지직 팔로우/후원이 실시간으로 표시됨
 3. ✅ CPU 사용률이 2% 미만
 4. ✅ 24시간 연속 작동 (메모리 누수 없음)
 5. ✅ 에러 발생 시 자동 복구
+
+### 대체 성공 기준 (치지직 API 없을 경우)
+1. ✅ Twitch로 MVP 검증 완료
+2. ✅ 치지직 연동 계획 수립
+3. ✅ 한국 시장 진출 전략 구체화
 
 ### 다음 단계로 진행 조건
 - 최소 10명의 테스터가 실제로 사용

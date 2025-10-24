@@ -332,21 +332,29 @@ VITE_WS_URL=ws://localhost:3000
 - [ ] URL 복사 기능
 - [ ] 테스트 전송
 
-### 🔴 Phase 4: Twitch 연동 (3주)
+### 🔴 Phase 4: 치지직 연동 (3주)
+- [ ] 치지직 API 조사
 - [ ] OAuth 인증
-- [ ] EventSub 웹훅
-- [ ] 실제 이벤트 수신
+- [ ] 실시간 이벤트 수신
+- [ ] 팔로우/후원 알림
 
 **MVP 완성 목표: 8주 (2개월)**
 
-### 🟡 Phase 5-7: 기능 확장 (7주)
+### 🟡 Phase 5-8: 한국 시장 완성 (9주)
 - [ ] 커스터마이징
 - [ ] 추가 위젯 타입
+- [ ] SOOP (아프리카TV) 연동
 - [ ] YouTube 연동
 
-### 🟢 Phase 8+: 고급 기능 (지속)
-- [ ] 후원 통합
-- [ ] 고급 위젯
+### 🌟 Phase 9: 넥슨 게임 연동 (4주+)
+**차별화 핵심 기능!**
+- [ ] 메이플스토리 플레이 이벤트
+- [ ] 던파, 카트라이더 등
+- [ ] 게임 스트리머 특화
+
+### 🟢 Phase 10+: 고급 기능 (지속)
+- [ ] 후원 통합 (Toss, Kakaopay)
+- [ ] 고급 위젯 (목표, 투표)
 - [ ] 관리자 도구
 
 ## 라이선스
@@ -360,10 +368,18 @@ MIT License - 자세한 내용은 [LICENSE](LICENSE) 파일을 참고하세요.
 
 ## 참고 자료
 
-- [설계 문서](./DESIGN.md)
-- [프로젝트 구조](./PROJECT_STRUCTURE.md)
-- [Twitch API](https://dev.twitch.tv/docs/api/)
+### 프로젝트 문서
+- [설계 문서](./DESIGN.md) - 전체 시스템 아키텍처
+- [프로젝트 구조](./PROJECT_STRUCTURE.md) - 폴더 구조 및 코딩 컨벤션
+- [로드맵](./ROADMAP.md) - 단계별 개발 계획
+- [MVP 정의](./MVP.md) - 최소 기능 제품 명세
+- [플랫폼 연동](./PLATFORMS.md) - 치지직, SOOP, YouTube, 넥슨 게임 연동 전략
+
+### 외부 API
+- [치지직 개발자](https://developers.chzzk.naver.com/) - 조사 필요
+- [SOOP API](https://developers.afreecatv.com/) - 아프리카TV
 - [YouTube Live API](https://developers.google.com/youtube/v3/live)
+- [Twitch API](https://dev.twitch.tv/docs/api/) - 참고용
 - [OBS Browser Source](https://obsproject.com/wiki/Sources-Guide#browsersource)
 
 ---
